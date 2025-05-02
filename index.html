@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini GoAnimate - Video Maker</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* General page styling */
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f8f8f8;
+      text-align: center;
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    /* Scene preview container */
+    #scenePreview {
+      width: 800px;
+      height: 400px;
+      margin: 20px auto;
+      border: 2px solid #333;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    /* Character styling */
+    .character {
+      position: absolute;
+      bottom: 0;
+      width: 100px;
+    }
+
+    .dialogue {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 5px;
+      margin-top: 4px;
+      border-radius: 5px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* Toolbar controls */
+    .scene-controls {
+      margin: 10px 0;
+    }
+
+    select, input, button {
+      margin: 5px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Timeline thumbnails */
+    .timeline {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .scene-thumbnail {
+      display: inline-block;
+      width: 100px;
+      height: 60px;
+      margin: 5px;
+      border: 2px solid #ccc;
+      background-size: cover;
+      background-position: center;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
+    }
+
+    .scene-thumbnail.active {
+      border-color: #007bff;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎬 Mini GoAnimate - Video Maker</h1>
+
+  <div class="scene-controls">
+    <label>Background:</label>
+    <select id="bgSelect">
+      <option value="bg_classroom.jpg">Classroom</option>
+      <option value="bg_park.jpg">Park</option>
+      <option value="bg_office.jpg">Office</option>
+    </select>
+
+    <label>Character:</label>
+    <select id="charSelect">
+      <option value="char_jack.png">Jack</option>
+      <option value="char_julie.png">Julie</option>
+      <option value="char_amy.png">Amy</option>
+    </select>
+
+    <input type="text" id="dialogue" placeholder="Character says..." />
+    <button onclick="addCharacter()">Add Character</button>
+    <button onclick="addScene()">➕ New Scene</button>
+  </div>
+
+  <div id="scenePreview"></div>
+
+  <div class="timeline" id="timeline"></div>
+
+  <script>
+    const scenePreview = document.getElementById('scenePreview');
+    const bgSelect = document.getElementById('bgSelect');
+    const charSelect = document.getElementById('charSelect');
+    const dialogueInput = document.getElementById('dialogue');
+    const timeline = document.getElementById('timeline');
+
+    let scenes = [];
+    let currentSceneIndex = 0;
+
+    function init() {
+      addScene(); // Create first scene by default
+    }
+
+    function addScene() {
+      const newScene = {
+        background: 'bg_classroom.jpg',
+        characters: []
+      };
+      scenes.push(newScene);
+      currentSceneIndex = scenes.length - 1;
+      renderScene();
+      updateTimeline();
+    }
+
+    function addCharacter() {
+      const scene = scenes[currentSceneIndex];
+      scene.characters.push({
+        img: charSelect.value,
+        dialogue: dialogueInput.value,
+        x: Math.floor(Math.random() * 700)
+      });
+      renderScene();
+    }
+
+    function renderScene() {
+      const scene = scenes[currentSceneIndex];
+      scenePreview.innerHTML = '';
+      scenePreview.style.backgroundImage = `url('https://images.unsplash.com/photo-1588072432836-e10032774350')`; // default classroom
+
+      if (scene.background === 'bg_park.jpg') {
+        scenePreview.style.backgroundImage = `url('https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf')`;
+      } else if (scene.background === 'bg_office.jpg') {
+        scenePreview.style.backgroundImage = `url('https://images.unsplash.com/photo-1593642531955-b62e17e4a1b1')`;
+      }
+
+      scene.characters.forEach(char => {
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = char.x + 'px';
+        container.style.bottom = '0';
+
+        const img = document.createElement('img');
+        img.src = getCharacterImage(char.img);
+        img.className = 'character';
+
+        const dialogue = document.createElement('div');
+        dialogue.className = 'dialogue';
+        dialogue.innerText = char.dialogue;
+
+        container.appendChild(img);
+        container.appendChild(dialogue);
+        scenePreview.appendChild(container);
+      });
+    }
+
+    function getCharacterImage(char) {
+      switch (char) {
+        case 'char_jack.png':
+          return 'https://www.w3schools.com/howto/img_avatar.png';
+        case 'char_julie.png':
+          return 'https://www.w3schools.com/howto/img_avatar2.png';
+        case 'char_amy.png':
+          return 'https://www.w3schools.com/w3images/avatar6.png';
+        default:
+          return '';
+      }
+    }
+
+    function updateTimeline() {
+      timeline.innerHTML = '';
+      scenes.forEach((scene, index) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'scene-thumbnail';
+        if (index === currentSceneIndex) thumb.classList.add('active');
+
+        if (scene.background === 'bg_classroom.jpg') {
+          thumb.style.backgroundImage = `url('https://images.unsplash.com/photo-1588072432836-e10032774350')`;
+        } else if (scene.background === 'bg_park.jpg') {
+          thumb.style.backgroundImage = `url('https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf')`;
+        } else {
+          thumb.style.backgroundImage = `url('https://images.unsplash.com/photo-1593642531955-b62e17e4a1b1')`;
+        }
+
+        thumb.onclick = () => {
+          currentSceneIndex = index;
+          renderScene();
+          updateTimeline();
+        };
+        timeline.appendChild(thumb);
+      });
+    }
+
+    bgSelect.addEventListener('change', () => {
+      scenes[currentSceneIndex].background = bgSelect.value;
+      renderScene();
+      updateTimeline();
+    });
+
+    window.onload = init;
+  </script>
+
+</body>
+</html>
